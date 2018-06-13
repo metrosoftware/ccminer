@@ -511,6 +511,9 @@
     <CudaCompile Include="Algo256\keccak256.cu">
       <Filter>Source Files\CUDA</Filter>
     </CudaCompile>
+    <CudaCompile Include="Algo256\metro.cu">
+      <Filter>Source Files\CUDA</Filter>
+    </CudaCompile>
     <CudaCompile Include="Algo256\cuda_blake256.cu">
       <Filter>Source Files\CUDA\Algo256</Filter>
     </CudaCompile>

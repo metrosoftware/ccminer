@@ -418,6 +418,7 @@
       <FastMath>true</FastMath>
     </CudaCompile>
     <CudaCompile Include="Algo256\keccak256.cu" />
+    <CudaCompile Include="Algo256\metro.cu" />
     <CudaCompile Include="Algo256\cuda_blake256.cu" />
     <CudaCompile Include="Algo256\cuda_fugue256.cu" />
     <CudaCompile Include="Algo256\cuda_groestl256.cu" />

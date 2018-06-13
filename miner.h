@@ -302,6 +302,10 @@ extern int scanhash_keccak256(int thr_id, uint32_t *pdata,
 	uint32_t *ptarget, uint32_t max_nonce,
 	uint32_t *hashes_done);
 
+extern int scanhash_keccak256_metro(int thr_id, uint32_t *pdata,
+	uint32_t *ptarget, uint32_t max_nonce,
+	uint32_t *hashes_done);
+
 extern int scanhash_myriad(int thr_id, uint32_t *pdata,
 	uint32_t *ptarget, uint32_t max_nonce,
 	uint32_t *hashes_done);
@@ -648,6 +652,7 @@ enum sha_algos
 	ALGO_FUGUE256,		/* Fugue256 */
 	ALGO_GROESTL,
 	ALGO_KECCAK,
+	ALGO_KECCAK_METRO,
 	ALGO_JACKPOT,
 	ALGO_LUFFA_DOOM,
 	ALGO_LYRA2v2,
@@ -724,6 +729,7 @@ void doomhash(void *state, const void *input);
 void fresh_hash(void *state, const void *input);
 void fugue256_hash(unsigned char* output, const unsigned char* input, int len);
 void keccak256_hash(void *state, const void *input);
+void keccak256_metro_hash(void *state, const void *input);
 unsigned int jackpothash(void *state, const void *input);
 void groestlhash(void *state, const void *input);
 void myriadhash(void *state, const void *input);

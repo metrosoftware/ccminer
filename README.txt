@@ -76,6 +76,7 @@ its command line interface and options.
 			luffa       Doomcoin
 			lyra2v2     VertCoin
 			myr-gr      Myriad-Groestl
+			metro       Keccak-256 (Metro)
             neoscrypt   neoscrypt (FeatherCoin)
 			nist5       NIST5 (TalkCoin)
 			penta       Pentablake hash (5x Blake 512)

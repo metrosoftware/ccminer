@@ -110,6 +110,7 @@ const char *algo_names[] =
 	"fugue256",
 	"groestl",
 	"keccak",
+	"metro",
 	"jackpot",
 	"luffa",
 	"lyra2v2",
@@ -251,6 +252,7 @@ Options:\n\
 			keccak      Keccak-256 (Maxcoin)\n\
 			luffa       Doomcoin\n\
 			lyra2v2     VertCoin\n\
+			metro       Keccak-256 (Metro)\n\
 			myr-gr      Myriad-Groestl\n\
 			neoscrypt   neoscrypt (FeatherCoin)\n\
 			nist5       NIST5 (TalkCoin)\n\
@@ -576,9 +578,10 @@ static bool work_decode(const json_t *val, struct work *work)
 		applog(LOG_ERR, "JSON invalid target", target_size);
 		return false;
 	}
-
-	for(i = 0; i < adata_sz; i++)
-		work->data[i] = le32dec(work->data + i);
+    if (opt_algo != ALGO_KECCAK_METRO) {
+        for(i = 0; i < adata_sz; i++)
+            work->data[i] = le32dec(work->data + i);
+    }
 	for(i = 0; i < atarget_sz; i++)
 		work->target[i] = le32dec(work->target + i);
 
@@ -1367,6 +1370,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_FUGUE256:
 		case ALGO_GROESTL:
 		case ALGO_KECCAK:
+		case ALGO_KECCAK_METRO:
 		case ALGO_LYRA2v2:
 			diff_to_target(work->target, sctx->job.diff / (256.0 * opt_difficulty));
 			break;
@@ -1464,6 +1468,9 @@ static void *miner_thread(void *userdata)
 		{
 			case ALGO_SIA:
 				wcmplen = 80;
+				break;
+			case ALGO_KECCAK_METRO:
+				wcmplen = 94;
 				break;
 			default:
 				wcmplen = 76;
@@ -1582,6 +1589,7 @@ static void *miner_thread(void *userdata)
 		switch(opt_algo)
 		{
 			case ALGO_KECCAK:
+		    case ALGO_KECCAK_METRO:
 				minmax = 83000000 * max64time;
 				break;
 			case ALGO_BLAKE:
@@ -1681,6 +1689,11 @@ static void *miner_thread(void *userdata)
 
 		case ALGO_KECCAK:
 			rc = scanhash_keccak256(thr_id, work.data, work.target,
+									max_nonce, &hashes_done);
+			break;
+
+		case ALGO_KECCAK_METRO:
+			rc = scanhash_keccak256_metro(thr_id, work.data, work.target,
 									max_nonce, &hashes_done);
 			break;
 
@@ -2881,7 +2894,7 @@ int main(int argc, char *argv[])
 {
 	struct thr_info *thr;
 	int i;
-	
+
 	// strdup on char* to allow a common free() if used
 	opt_syslog_pfx = strdup(PROGRAM_NAME);
 	opt_api_allow = strdup("127.0.0.1"); /* 0.0.0.0 for all ips */

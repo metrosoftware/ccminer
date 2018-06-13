@@ -431,7 +431,7 @@ static int sockopt_keepalive_cb(void *userdata, curl_socket_t fd,
 	DWORD outputBytes;
 #endif
 
-#ifndef WIN32	
+#ifndef WIN32
 	if(unlikely(setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
 		sizeof(keepalive))))
 		return 1;
@@ -2294,6 +2294,10 @@ void print_hash_tests(void)
 	memset(hash, 0, sizeof hash);
 	keccak256_hash(&hash[0], &buf[0]);
 	printpfx("keccak", hash);
+
+	memset(hash, 0, sizeof hash);
+	keccak256_metro_hash(&hash[0], &buf[0]);
+	printpfx("metro", hash);
 
 	memset(hash, 0, sizeof hash);
 	doomhash(&hash[0], &buf[0]);
