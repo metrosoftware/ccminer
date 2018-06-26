@@ -12,7 +12,7 @@
 #endif
 #include <inttypes.h>
 #include <sys/time.h>
-#include <pthread.h>
+#include "compat\pthreads\pthread.h"
 #include <jansson.h>
 #include <curl/curl.h>
 

@@ -371,6 +371,15 @@
     <ClInclude Include="SHA3api_ref.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="compat\pthreads\pthread.h">
+      <Filter>Header Files\compat</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\pthreads\sched.h">
+      <Filter>Header Files\compat</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\includes-x64\jansson.h">
+      <Filter>Header Files\compat</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="cuda.cpp">
@@ -396,42 +405,6 @@
     </CudaCompile>
     <CudaCompile Include="JHA\cuda_jha_compactionTest.cu">
       <Filter>Source Files\CUDA\JHA</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_jh512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_quark_blake512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_quark_groestl512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_skein512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_bmw512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_quark_compactionTest.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_quark_keccak512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\quarkcoin.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
-    <CudaCompile Include="qubit\deep.cu">
-      <Filter>Source Files\CUDA\qubit</Filter>
-    </CudaCompile>
-    <CudaCompile Include="qubit\doom.cu">
-      <Filter>Source Files\CUDA\qubit</Filter>
-    </CudaCompile>
-    <CudaCompile Include="qubit\qubit.cu">
-      <Filter>Source Files\CUDA\qubit</Filter>
-    </CudaCompile>
-    <CudaCompile Include="qubit\qubit_luffa512.cu">
-      <Filter>Source Files\CUDA\qubit</Filter>
     </CudaCompile>
     <CudaCompile Include="cuda_nist5.cu">
       <Filter>Source Files\CUDA</Filter>
@@ -471,9 +444,6 @@
     </CudaCompile>
     <CudaCompile Include="x13\x13.cu">
       <Filter>Source Files\CUDA\x13</Filter>
-    </CudaCompile>
-    <CudaCompile Include="cuda_checkhash.cu">
-      <Filter>Source Files\CUDA</Filter>
     </CudaCompile>
     <CudaCompile Include="x15\x14.cu">
       <Filter>Source Files\CUDA\x15</Filter>
@@ -526,12 +496,6 @@
     <CudaCompile Include="Algo256\cuda_keccak256.cu">
       <Filter>Source Files\CUDA\Algo256</Filter>
     </CudaCompile>
-    <CudaCompile Include="Algo256\cuda_skein256.cu">
-      <Filter>Source Files\CUDA\Algo256</Filter>
-    </CudaCompile>
-    <CudaCompile Include="quark\cuda_jh512keccak512.cu">
-      <Filter>Source Files\CUDA\quark</Filter>
-    </CudaCompile>
     <CudaCompile Include="cuda_bitcoin.cu">
       <Filter>Source Files\CUDA</Filter>
     </CudaCompile>
@@ -579,6 +543,52 @@
     </CudaCompile>
     <CudaCompile Include="neoscrypt\cuda_neoscrypt_tpruvot.cu">
       <Filter>Source Files\CUDA\neoscrypt</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_quark_blake512.cu" />
+    <CudaCompile Include="qubit\qubit.cu">
+      <Filter>Source Files\CUDA\qubit</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\quarkcoin.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="qubit\deep.cu">
+      <Filter>Source Files\CUDA\qubit</Filter>
+    </CudaCompile>
+    <CudaCompile Include="qubit\doom.cu">
+      <Filter>Source Files\CUDA\qubit</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_quark_blake512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_quark_groestl512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda_checkhash.cu">
+      <Filter>Source Files\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_bmw512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_skein512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="qubit\qubit_luffa512.cu">
+      <Filter>Source Files\CUDA\qubit</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_quark_keccak512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_jh512keccak512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_quark_compactionTest.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Algo256\cuda_skein256.cu">
+      <Filter>Source Files\CUDA\Algo256</Filter>
+    </CudaCompile>
+    <CudaCompile Include="quark\cuda_jh512.cu">
+      <Filter>Source Files\CUDA\quark</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

@@ -563,7 +563,6 @@ void blake256_gpu_hash_16(const uint32_t threads, const uint32_t startNonce, uin
 				uint64_t high64 = ((uint64_t*)h)[3];
 				printf("gpu:  %16llx\n", high64);
 				printf("gpu: %08x.%08x\n", h[7], h[6]);
-				printf("tgt:  %16llx\n", highTarget);
 			}
 #endif
 		}
@@ -609,7 +608,6 @@ void blake256_gpu_hash_16_8(const uint32_t threads, const uint32_t startNonce, u
 				uint64_t high64 = ((uint64_t*)h)[3];
 				printf("gpu:  %16llx\n", high64);
 				printf("gpu: %08x.%08x\n", h[7], h[6]);
-				printf("tgt:  %16llx\n", highTarget);
 			}
 #endif
 		}

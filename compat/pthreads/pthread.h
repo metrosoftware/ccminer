@@ -300,7 +300,7 @@ enum {
 #  define ENOTRECOVERABLE 44
 #endif
 
-#include <sched.h>
+#include "sched.h"
 
 /*
  * To avoid including windows.h we define only those things that we
@@ -315,6 +315,10 @@ enum {
 # define PTW32__DWORD_DEF
 # define DWORD unsigned long
 #endif
+#endif
+
+#ifdef _MSC_VER
+#define _TIMESPEC_DEFINED
 #endif
 
 #if !defined(HAVE_STRUCT_TIMESPEC)
