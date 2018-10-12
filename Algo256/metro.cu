@@ -19,20 +19,25 @@
  extern void keccak256_cpu_hash_M(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *h_nounce);
  
  // CPU Hash
- void keccak256_metro_hash(void *state, const void *input)
+ void keccak256_general_hash(void *state, const void *input)
  {
 	 sph_keccak_context ctx_keccak;
  
 	 uint32_t hash[16];
  
 	 sph_keccak256_init(&ctx_keccak);
-	 sph_keccak256 (&ctx_keccak, input, 98);
+	 sph_keccak256 (&ctx_keccak, input, len);
 	 sph_keccak256_close(&ctx_keccak, (void*) hash);
  
 	 memcpy(state, hash, 32);
  }
 
-extern void setnounce(uint32_t *pdata, uint32_t nounce) {
+ void keccak256_metro_hash(void *state, const void *input)
+ {
+	 keccak256_general_hash(state, input, 98);
+ }
+
+ extern void setnounce(uint32_t *pdata, uint32_t nounce) {
     pdata[23] = (pdata[23] & 0xFFFFU) | ((nounce & 0xFFFFU) << 16);
     pdata[24] = (nounce & 0xFFFF0000U) >> 16;
 }

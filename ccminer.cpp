@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2010 Jeff Garzik
  * Copyright 2012-2014 pooler
  * Copyright 2014-2015 tpruvot
@@ -722,15 +722,10 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 		uint32_t sent = 0;
 		uint32_t ntime, nonce;
 		char *ntimestr, *noncestr, *xnonce2str;
-
-		if(opt_algo != ALGO_SIA)
-		{
-			le32enc(&ntime, work->data[17]);
-			le32enc(&nonce, work->data[19]);
-			noncestr = bin2hex((const uchar*)(&nonce), 4);
-			ntimestr = bin2hex((const uchar*)(&ntime), 4);
-		}
-		else
+		char *datastr;
+		datastr = bin2hex((const uchar*)work->data, 128);
+		applog(LOG_DEBUG, "Will submit following work %s", datastr);
+		if(opt_algo == ALGO_SIA)
 		{
 			le32enc(&ntime, work->data[10]);
 			uint64_t ntime64 = ntime;
@@ -740,6 +735,21 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			nonce64 += (uint64_t)nonce << 32;
 			noncestr = bin2hex((const uchar*)(&nonce64), 8);
 			ntimestr = bin2hex((const uchar*)(&ntime64), 8);
+		} else if (opt_algo == ALGO_KECCAK_METRO) {
+			le32enc(&ntime, ((const uint32_t *)(((const uchar *)work->data) + 82))[0]);
+			uint64_t ntime64 = ntime;
+			le32enc(&ntime, ((const uint32_t *)(((const uchar *)work->data) + 86))[0]);
+			ntime64 += (uint64_t)ntime << 32;
+			le32enc(&nonce, ((const uint32_t *)(((const uchar *)work->data) + 94))[0]);
+			ntimestr = bin2hex((const uchar*)(&ntime64), 8);
+			noncestr = bin2hex((const uchar*)(&nonce), 4);
+		}
+		else
+		{
+			le32enc(&ntime, work->data[17]);
+			le32enc(&nonce, work->data[19]);
+			noncestr = bin2hex((const uchar*)(&nonce), 4);
+			ntimestr = bin2hex((const uchar*)(&ntime), 4);
 		}
 
 
@@ -1277,6 +1287,9 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_WHC:
 			SHA256((uchar*)sctx->job.coinbase, sctx->job.coinbase_size, (uchar*)merkle_root);
 			break;
+		case ALGO_KECCAK_METRO:
+			keccak256_general_hash(&merkle_root[0], &sctx->job.coinbase[0], sctx->job.coinbase_size);
+			break;
 		case ALGO_SIA:
 		{
 			merkle_root[0] = (uchar)0;
@@ -1296,6 +1309,12 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		{
 			memcpy(merkle_root + 1, sctx->job.merkle[i], 32);
 			siahash(merkle_root, 65, merkle_root + 33);
+		}
+		else if (opt_algo == ALGO_KECCAK_METRO)
+		{
+			memcpy(merkle_root + 1, sctx->job.merkle[i], 32);
+			siahash(merkle_root, 65, merkle_root + 33);
+			keccak256_metro_hash(&merkle_root[0], &merkle_root[0], 64);
 		}
 		else
 		{
@@ -1320,7 +1339,38 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 
 	/* Assemble block header */
 	memset(work->data, 0, sizeof(work->data));
-	if(opt_algo != ALGO_SIA)
+	if(opt_algo == ALGO_SIA)
+	{
+		for(i = 0; i < 8; i++)
+			work->data[i] = le32dec((uint32_t *)sctx->job.prevhash + i);
+		work->data[8] = 0; // nonce
+		work->data[9] = highnonce;
+		work->data[10] = le32dec(sctx->job.ntime);
+		work->data[11] = 0;
+		for(i = 0; i < 8; i++)
+			work->data[12 + i] = le32dec((uint32_t *)(merkle_root + 33) + i);
+	}
+	else if (opt_algo == ALGO_KECCAK_METRO)
+	{
+        applog(LOG_DEBUG, "Stratum gen work - this is metro");
+		work->data[0] = le32dec(sctx->job.version);
+		for(i = 0; i < 4; i++)
+			work->data[1 + i] = le32dec((uint32_t *)sctx->job.prevhash + i);
+		for(i = 0; i < 8; i++)
+			work->data[5 + i] = le32dec((uint32_t *)merkle_root + i);
+		for(i = 0; i < 8; i++)
+			work->data[13 + i] = le32dec((uint32_t *)sctx->job.extra_data + i);
+		work->data[21] = le32dec(sctx->job.ntime);
+		work->data[22] = le32dec(sctx->job.ntime + 4);
+		work->data[23] = le32dec(sctx->job.nbits);
+		work->data[25] = 0x00000080;
+		char *shift = (char *)work->data;
+		for (int i=2;i<100;i++) {
+           *(shift + i)= *(shift + i + 2);
+		}
+		work->data[31] = 0x10030000;
+	}
+	else
 	{
 		work->data[0] = le32dec(sctx->job.version);
 		for(i = 0; i < 8; i++)
@@ -1331,17 +1381,6 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		work->data[18] = le32dec(sctx->job.nbits);
 		work->data[20] = 0x80000000;
 		work->data[31] = 0x00000280;
-	}
-	else
-	{
-		for(i = 0; i < 8; i++)
-			work->data[i] = le32dec((uint32_t *)sctx->job.prevhash + i);
-		work->data[8] = 0; // nonce
-		work->data[9] = highnonce;
-		work->data[10] = le32dec(sctx->job.ntime);
-		work->data[11] = 0;
-		for(i = 0; i < 8; i++)
-			work->data[12 + i] = le32dec((uint32_t *)(merkle_root + 33) + i);
 	}
 
 	pthread_mutex_unlock(&sctx->work_lock);
@@ -1370,7 +1409,6 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_FUGUE256:
 		case ALGO_GROESTL:
 		case ALGO_KECCAK:
-		case ALGO_KECCAK_METRO:
 		case ALGO_LYRA2v2:
 			diff_to_target(work->target, sctx->job.diff / (256.0 * opt_difficulty));
 			break;

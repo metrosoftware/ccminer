@@ -1522,7 +1522,7 @@ static uint32_t getblocheight(struct stratum_ctx *sctx)
 
 static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 {
-	const char *job_id, *prevhash, *coinb1, *coinb2, *version, *nbits, *nreward;
+	const char *job_id, *prevhash, *coinb1, *coinb2, *version, *nbits, *nreward, *extra_data;
 	char *stime;
 	size_t coinb1_size, coinb2_size;
 	bool clean, ret = false;
@@ -1530,31 +1530,41 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	json_t *merkle_arr;
 	uchar **merkle = NULL;
 	int32_t ntime;
-
-	job_id = json_string_value(json_array_get(params, 0));
-	prevhash = json_string_value(json_array_get(params, 1));
-	coinb1 = json_string_value(json_array_get(params, 2));
-	coinb2 = json_string_value(json_array_get(params, 3));
-	merkle_arr = json_array_get(params, 4);
+	int p=0;
+	int prevhash_len = 64;
+	int version_len = 8;
+	job_id = json_string_value(json_array_get(params, p++));
+	prevhash = json_string_value(json_array_get(params, p++));
+	if (opt_algo == ALGO_KECCAK_METRO) {
+		extra_data = json_string_value(json_array_get(params, p++));
+		prevhash_len = 32;
+		version_len = 4;
+	}
+	else {
+		extra_data = (const char *)"";
+	}
+	coinb1 = json_string_value(json_array_get(params, p++));
+	coinb2 = json_string_value(json_array_get(params, p++));
+	merkle_arr = json_array_get(params, p++);
 	if(!merkle_arr || !json_is_array(merkle_arr))
 		goto out;
 	merkle_count = (int)json_array_size(merkle_arr);
 	if(opt_algo != ALGO_SIA)
-		version = json_string_value(json_array_get(params, 5));
+		version = json_string_value(json_array_get(params, p++));
 	else
 		version = "00000001"; //unused
-	nbits = json_string_value(json_array_get(params, 6));
-	stime = (char *)json_string_value(json_array_get(params, 7));
-	clean = json_is_true(json_array_get(params, 8));
-	nreward = json_string_value(json_array_get(params, 9));
+	nbits = json_string_value(json_array_get(params, p++));
+	stime = (char *)json_string_value(json_array_get(params, p++));
+	clean = json_is_true(json_array_get(params, p));p++;
+	nreward = json_string_value(json_array_get(params, p++));
 
 	if(!job_id || !prevhash || !coinb1 || !coinb2 || !version || !nbits || !stime ||
-		 strlen(prevhash) != 64 || strlen(version) != 8 || strlen(nbits) != 8)
+		 strlen(prevhash) != prevhash_len || strlen(version) != version_len || strlen(nbits) != 8)
 	{
 		applog(LOG_ERR, "Stratum notify: invalid parameters");
 		goto out;
 	}
-	if(opt_algo == ALGO_SIA)
+	if(opt_algo == ALGO_SIA || opt_algo == ALGO_KECCAK_METRO )
 	{
 		if(strlen(stime) != 16)
 		{
@@ -1639,11 +1649,13 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	free(sctx->job.job_id);
 	sctx->job.job_id = strdup(job_id);
 	hex2bin(sctx->job.prevhash, prevhash, 32);
-
-	if(opt_algo != ALGO_SIA)
-		sctx->job.height = getblocheight(sctx);
-	else
+	if(opt_algo == ALGO_KECCAK_METRO) {
+        hex2bin(sctx->job.extra_data, extra_data, 32);
+	}
+	if(opt_algo == ALGO_SIA || opt_algo == ALGO_KECCAK_METRO)
 		sctx->job.height = 1;
+	else
+		sctx->job.height = getblocheight(sctx);
 	if(!opt_quiet)
 	{
 		applog(LOG_BLUE, "Received new %s block header", algo_names[opt_algo]);
@@ -1655,9 +1667,14 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	sctx->job.merkle = merkle;
 	sctx->job.merkle_count = merkle_count;
 
-	hex2bin(sctx->job.version, version, 4);
+	if(opt_algo == ALGO_KECCAK_METRO) {
+        hex2bin(sctx->job.ntime, stime, 8);
+        hex2bin(sctx->job.version, version, 2);
+	} else {
+        hex2bin(sctx->job.version, version, 4);
+        hex2bin(sctx->job.ntime, stime, 4);
+	}
 	hex2bin(sctx->job.nbits, nbits, 4);
-	hex2bin(sctx->job.ntime, stime, 4);
 	if(nreward != NULL)
 	{
 		if(strlen(nreward) == 4)
@@ -1672,6 +1689,7 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 
 	ret = true;
 
+    applog(LOG_DEBUG, "Stratum notify finished success!");
 out:
 	return ret;
 }
@@ -1693,7 +1711,7 @@ static bool stratum_set_difficulty(struct stratum_ctx *sctx, json_t *params)
 	if(diff != global_diff)
 	{
 		global_diff = diff;
-		applog(LOG_WARNING, "Stratum difficulty set to %g", diff);
+        applog(LOG_WARNING, "Stratum difficulty set to %g", diff);
 		g_work_time = 0;
 	}
 
@@ -1974,6 +1992,7 @@ bool stratum_handle_method(struct stratum_ctx *sctx, const char *s)
 	method = json_string_value(json_object_get(val, "method"));
 	if(!method)
 		goto out;
+    applog(LOG_DEBUG, "Stratum handle method %s", method);
 	id = json_object_get(val, "id");
 	params = json_object_get(val, "params");
 

@@ -575,6 +575,7 @@ uint32_t device_intensity(int thr_id, const char *func, uint32_t defcount);
 struct stratum_job {
 	char *job_id;
 	unsigned char prevhash[32];
+	unsigned char extra_data[32];
 	size_t coinbase_size;
 	unsigned char *coinbase;
 	unsigned char *xnonce2;
@@ -582,7 +583,7 @@ struct stratum_job {
 	unsigned char **merkle;
 	unsigned char version[4];
 	unsigned char nbits[4];
-	unsigned char ntime[4];
+	unsigned char ntime[8];
 	bool clean;
 	unsigned char nreward[2];
 	uint32_t height;
@@ -730,6 +731,7 @@ void fresh_hash(void *state, const void *input);
 void fugue256_hash(unsigned char* output, const unsigned char* input, int len);
 void keccak256_hash(void *state, const void *input);
 void keccak256_metro_hash(void *state, const void *input);
+void keccak256_general_hash(void *state, const void *input, size_t len);
 unsigned int jackpothash(void *state, const void *input);
 void groestlhash(void *state, const void *input);
 void myriadhash(void *state, const void *input);
