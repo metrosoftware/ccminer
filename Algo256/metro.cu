@@ -19,7 +19,7 @@
  extern void keccak256_cpu_hash_M(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *h_nounce);
  
  // CPU Hash
- void keccak256_general_hash(void *state, const void *input)
+ void keccak256_general_hash(void *state, const void *input, size_t len)
  {
 	 sph_keccak_context ctx_keccak;
  

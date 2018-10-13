@@ -1314,7 +1314,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		{
 			memcpy(merkle_root + 1, sctx->job.merkle[i], 32);
 			siahash(merkle_root, 65, merkle_root + 33);
-			keccak256_metro_hash(&merkle_root[0], &merkle_root[0], 64);
+			keccak256_general_hash(&merkle_root[0], &merkle_root[0], 64);
 		}
 		else
 		{
@@ -1352,7 +1352,6 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 	}
 	else if (opt_algo == ALGO_KECCAK_METRO)
 	{
-        applog(LOG_DEBUG, "Stratum gen work - this is metro");
 		work->data[0] = le32dec(sctx->job.version);
 		for(i = 0; i < 4; i++)
 			work->data[1 + i] = le32dec((uint32_t *)sctx->job.prevhash + i);

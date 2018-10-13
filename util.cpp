@@ -31,6 +31,13 @@
 #endif
 #include "miner.h"
 #include "elist.h"
+
+#define __cdecl
+
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
+
+
 using namespace std;
 
 extern enum sha_algos opt_algo;
@@ -1689,7 +1696,6 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 
 	ret = true;
 
-    applog(LOG_DEBUG, "Stratum notify finished success!");
 out:
 	return ret;
 }
@@ -2259,11 +2265,11 @@ void do_gpu_tests(void)
 	tgt[7] = 0xffff;
 
 	memset(buf, 0, sizeof buf);
-	scanhash_x11(0, (uint32_t*)buf, tgt, 1, &done);
+	scanhash_x11(0, (uint32_t*)buf, tgt, 1, (uint32_t *)&done);
 
 	//memset(buf, 0, sizeof buf);
 	// buf[0] = 1; buf[64] = 2; // for endian tests
-	scanhash_blake256(0, (uint32_t*)buf, tgt, 1, &done, 14);
+	scanhash_blake256(0, (uint32_t*)buf, tgt, 1, (uint32_t *)&done, 14);
 
 	memset(buf, 0, sizeof buf);
 

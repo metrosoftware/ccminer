@@ -443,7 +443,7 @@ void keccak256_setBlock_80(int thr_id, void *pdata,const void *pTargetIn)
 __host__
 void keccak256_setBlock_M(int thr_id, void *pdata,const void *pTargetIn)
 {
-    unsigned char len_m = 13;
+	const unsigned char len_m = 13;
 	unsigned char PaddedMessage[8 * len_m];
 	memcpy(PaddedMessage, pdata, 8 * len_m);
 	CUDA_SAFE_CALL(cudaMemcpyToSymbolAsync(pTarget, pTargetIn, 8 * sizeof(uint32_t), 0, cudaMemcpyHostToDevice, gpustream[thr_id]));
